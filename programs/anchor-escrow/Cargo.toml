@@ -18,3 +18,13 @@ no-idl = []
 anchor-lang = "0.18.2"
 anchor-spl = {version = "0.18.2"}
 spl-token = {version = "3.1.1", features = ["no-entrypoint"]}
+
+lazy_static = "1.4.0"
+
+ark-ff = { version = "^0.3.0", default-features = false }
+ark-std = { version = "^0.3.0", default-features = false }
+ark-bn254 = { version = "^0.3.0", default-features = false, features = [ "curve" ] }
+ark-crypto-primitives = { version = "^0.3.0", features = ["r1cs"], default-features = false }
+
+arkworks-gadgets = { version = "^0.3", features = ["default_poseidon"], default-features = false }
+# arkworks-gadgets = { version = "0.4.1", default-features = false }

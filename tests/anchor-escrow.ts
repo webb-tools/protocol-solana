@@ -132,4 +132,48 @@ describe('anchor-escrow', () => {
     assert.ok(_anchorMetadataAccount.depositAmount.toNumber() == depositAmount);
     assert.ok(_anchorMetadataAccount.depositTokenAccount.equals(depositTokenAccountA));
   });
+
+  it("DepositInto merkle tree", async () => {
+    const [_vault_account_pda, _vault_account_bump] = await PublicKey.findProgramAddress(
+      [Buffer.from(anchor.utils.bytes.utf8.encode("token-seed"))],
+      program.programId
+    );
+    vault_account_pda = _vault_account_pda;
+    vault_account_bump = _vault_account_bump;
+
+    const [_vault_authority_pda, _vault_authority_bump] = await PublicKey.findProgramAddress(
+      [Buffer.from(anchor.utils.bytes.utf8.encode("escrow"))],
+      program.programId
+    );
+    vault_authority_pda = _vault_authority_pda;
+
+    await program.rpc.deposit(
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      {
+        accounts: {
+          depositor: depositorMainAccount.publicKey,
+          vaultAccount: vault_account_pda,
+          depositTokenAccount: depositTokenAccountA,
+          anchorMetadata: anchorMetadataAccount.publicKey,
+          merkleTreeAccount: merkleTreeAccount.publicKey,
+          systemProgram: anchor.web3.SystemProgram.programId,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        },
+        signers: [depositorMainAccount],
+      }
+    );
+
+    let _vault = await mintA.getAccountInfo(vault_account_pda);
+
+    let _merkleTreeAccount = await program.account.merkleTreeAccount.fetch(
+      merkleTreeAccount.publicKey
+    );
+
+    let _anchorMetadataAccount = await program.account.anchorMetadata.fetch(
+      anchorMetadataAccount.publicKey
+    );
+
+    assert.equal(_anchorMetadataAccount.depositCount, 1);
+
+  });
 });

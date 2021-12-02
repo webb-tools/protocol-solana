@@ -1,9 +1,9 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{self, CloseAccount, Mint, SetAuthority, TokenAccount, Transfer};
+use anchor_spl::token::{self, Mint, SetAuthority, TokenAccount, Transfer};
 use spl_token::instruction::AuthorityType;
 
+mod hashing;
 mod merkle_tree;
-use merkle_tree::*;
 
 declare_id!("Dw96F8NjN84googpni4mtSnCuAud9XkaPUFM1RJX53cK");
 
@@ -47,7 +47,10 @@ pub mod anchor_escrow {
 
     pub fn deposit(ctx: Context<DepositInto>, commitment: [u8; 32]) -> ProgramResult {
         let mut merkle_tree_account = ctx.accounts.merkle_tree_account.load_mut()?;
-        let inserted_index = merkle_tree_account.insert(commitment);
+        let _inserted_index = merkle_tree_account.insert(commitment);
+
+        ctx.accounts.anchor_metadata.deposit_count += 1;
+
         token::transfer(
             ctx.accounts.into_transfer_to_pda_context(),
             ctx.accounts.anchor_metadata.deposit_amount,
@@ -94,6 +97,7 @@ pub struct MerkleTreeAccount {
     pub levels: u8,
     pub roots: [[u8; 32]; 32],
     pub filled_subtrees: [[u8; 32]; 32],
+    pub params: [u8; 6536],
 }
 
 #[account]
