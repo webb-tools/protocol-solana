@@ -48,13 +48,14 @@ pub mod anchor_escrow {
     pub fn deposit(ctx: Context<DepositInto>, commitment: [u8; 32]) -> ProgramResult {
         let mut merkle_tree_account = ctx.accounts.merkle_tree_account.load_mut()?;
         let _inserted_index = merkle_tree_account.insert(commitment);
-
-        ctx.accounts.anchor_metadata.deposit_count += 1;
-
-        token::transfer(
-            ctx.accounts.into_transfer_to_pda_context(),
-            ctx.accounts.anchor_metadata.deposit_amount,
-        )?;
+        if let Ok(index) = _inserted_index {
+            msg!("inserted_index: {}", index);
+            ctx.accounts.anchor_metadata.deposit_count += 1;
+            token::transfer(
+                ctx.accounts.into_transfer_to_pda_context(),
+                ctx.accounts.anchor_metadata.deposit_amount,
+            )?;
+        }
 
         Ok(())
     }

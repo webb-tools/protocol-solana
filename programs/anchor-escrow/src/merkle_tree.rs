@@ -12,13 +12,16 @@ pub enum MerkleTreeError {
 impl MerkleTreeAccount {
     pub fn insert(&mut self, commitment: [u8; 32]) -> Result<u32, MerkleTreeError> {
         let next_index = self.next_index;
+        msg!("next index: {:?}", next_index);
+        msg!("levels: {:?}", self.levels);
+        msg!("max leaf count: {:?}", 2u32.pow(self.levels as u32));
         if next_index == 2u32.pow(self.levels as u32) {
             return Err(MerkleTreeError::TreeFull);
         }
 
         let mut curr_index = next_index;
         let mut curr_level_hash = commitment;
-
+        msg!("curr hash: {:?}", curr_level_hash);
         for i in 0..self.levels {
             let (left, right) = if curr_index % 2 == 0 {
                 self.filled_subtrees[i as usize] = curr_level_hash;
@@ -43,6 +46,7 @@ impl MerkleTreeAccount {
         let mut buf = vec![];
         buf.extend_from_slice(&left);
         buf.extend_from_slice(&right);
+        println!("buf: {:?}", buf);
         if let Ok(value) = BN254CircomPoseidon3x5Hasher::hash(&self.params, &buf) {
             buf32.copy_from_slice(&value);
         }

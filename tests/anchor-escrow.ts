@@ -89,7 +89,7 @@ describe('anchor-escrow', () => {
     await program.rpc.initialize(
       vault_account_bump,
       new anchor.BN(depositAmount),
-      32,
+      30,
       {
         accounts: {
           initializer: depositorMainAccount.publicKey,
@@ -124,7 +124,7 @@ describe('anchor-escrow', () => {
 
     // Check that the values in the escrow account match what we expect.
     assert.ok(_merkleTreeAccount.initializerKey.equals(depositorMainAccount.publicKey));
-    assert.equal(_merkleTreeAccount.levels, 32);
+    assert.equal(_merkleTreeAccount.levels, 30);
     assert.equal(_merkleTreeAccount.currentRootIndex, 0);
     assert.equal(_merkleTreeAccount.nextIndex, 0);
 
@@ -173,7 +173,7 @@ describe('anchor-escrow', () => {
       anchorMetadataAccount.publicKey
     );
 
-    assert.equal(_anchorMetadataAccount.depositCount, 1);
+    assert.equal(_anchorMetadataAccount.depositCount.toString(), '1');
 
   });
 });
