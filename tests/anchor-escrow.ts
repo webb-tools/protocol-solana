@@ -148,7 +148,7 @@ describe('anchor-escrow', () => {
     vault_authority_pda = _vault_authority_pda;
 
     await program.rpc.deposit(
-      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       {
         accounts: {
           depositor: depositorMainAccount.publicKey,
@@ -173,7 +173,8 @@ describe('anchor-escrow', () => {
       anchorMetadataAccount.publicKey
     );
 
-    assert.equal(_anchorMetadataAccount.depositCount.toString(), '1');
-
+    for (let i = 0; i < 30; i++) {
+      assert.strictEqual(_merkleTreeAccount.queuedLeaves[0][i], 1);
+    }
   });
 });

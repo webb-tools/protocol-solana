@@ -2,8 +2,9 @@ use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Mint, SetAuthority, TokenAccount, Transfer};
 use spl_token::instruction::AuthorityType;
 
-mod hashing;
-mod merkle_tree;
+// mod hashing;
+// mod hashing_params;
+// mod merkle_tree;
 
 declare_id!("Dw96F8NjN84googpni4mtSnCuAud9XkaPUFM1RJX53cK");
 
@@ -32,6 +33,7 @@ pub mod anchor_escrow {
         merkle_tree_account.levels = levels;
         merkle_tree_account.roots = [[0u8; 32]; 32];
         merkle_tree_account.filled_subtrees = [[0u8; 32]; 32];
+        merkle_tree_account.queued_leaves = [[0u8; 32]; 1000];
 
         let (vault_authority, _vault_authority_bump) =
             Pubkey::find_program_address(&[ESCROW_PDA_SEED], ctx.program_id);
@@ -46,16 +48,27 @@ pub mod anchor_escrow {
     }
 
     pub fn deposit(ctx: Context<DepositInto>, commitment: [u8; 32]) -> ProgramResult {
-        let mut merkle_tree_account = ctx.accounts.merkle_tree_account.load_mut()?;
-        let _inserted_index = merkle_tree_account.insert(commitment);
-        if let Ok(index) = _inserted_index {
-            msg!("inserted_index: {}", index);
-            ctx.accounts.anchor_metadata.deposit_count += 1;
-            token::transfer(
-                ctx.accounts.into_transfer_to_pda_context(),
-                ctx.accounts.anchor_metadata.deposit_amount,
-            )?;
+        if commitment == [0u8; 32] {
+            return Err(ProgramError::InvalidArgument);
         }
+        msg!("deposit");
+        let mut merkle_tree_account = ctx.accounts.merkle_tree_account.load_mut()?;
+        msg!("load tree");
+        let queued_count = merkle_tree_account
+            .queued_leaves
+            .iter()
+            .filter(|x| *x != &[0u8; 32])
+            .count();
+        msg!("{:?}", queued_count);
+        if queued_count == 1000 {
+            return Err(ProgramError::InvalidArgument);
+        }
+        merkle_tree_account.queued_leaves[queued_count] = commitment;
+
+        token::transfer(
+            ctx.accounts.into_transfer_to_pda_context(),
+            ctx.accounts.anchor_metadata.deposit_amount,
+        )?;
 
         Ok(())
     }
@@ -98,7 +111,7 @@ pub struct MerkleTreeAccount {
     pub levels: u8,
     pub roots: [[u8; 32]; 32],
     pub filled_subtrees: [[u8; 32]; 32],
-    pub params: [u8; 6536],
+    pub queued_leaves: [[u8; 32]; 1000],
 }
 
 #[account]
