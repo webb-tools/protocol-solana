@@ -59,6 +59,8 @@ pub mod anchor_escrow {
 
         Ok(())
     }
+
+    // pub fn setup_params(ctx: Context<HashInitialize>, params: Vec<F>)
 }
 
 #[derive(Accounts)]
