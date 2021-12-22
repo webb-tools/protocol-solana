@@ -7,8 +7,8 @@ use arkworks_utils::poseidon::PoseidonParameters;
 pub struct CircomPoseidonHasher<F: PrimeField>(PhantomData<F>);
 
 impl<F: PrimeField> CircomPoseidonHasher<F> {
-    pub fn hash(input: &[u8], param_bytes: &[u8]) -> Result<Vec<u8>, Error> {
-        let params = PoseidonParameters::<F>::from_bytes(param_bytes)?;
+    pub fn hash(input: &[u8]) -> Result<Vec<u8>, Error> {
+        let params = arkworks_utils::utils::bn254_x5_3::get_poseidon_bn254_x5_3();
         let output: F = <CRH<F> as CRHTrait>::evaluate(&params, input)?;
         let value = output.into_repr().to_bytes_le();
         Ok(value)
