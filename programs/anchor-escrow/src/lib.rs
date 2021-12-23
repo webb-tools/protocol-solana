@@ -1,6 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Mint, SetAuthority, TokenAccount, Transfer};
 use spl_token::instruction::AuthorityType;
+use arkworks_utils::poseidon::fixed_sized_bn254_x5_3_params::FixedPoseidonBN254Parameters;
 
 mod hashing;
 mod merkle_tree;
@@ -60,7 +61,11 @@ pub mod anchor_escrow {
         Ok(())
     }
 
-    // pub fn setup_params(ctx: Context<HashInitialize>, params: Vec<F>)
+    pub fn setup_params(ctx: Context<HashInitialize>, params: Vec<[u8; 32]>) -> ProgramResult {
+        let mut merkle_tree_account = ctx.accounts.merkle_tree_account.load_mut()?;
+        let mut params: FixedPoseidonBN254Parameters = merkle_tree_account.params.params;
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
@@ -100,7 +105,12 @@ pub struct MerkleTreeAccount {
     pub levels: u8,
     pub roots: [[u8; 32]; 32],
     pub filled_subtrees: [[u8; 32]; 32],
-    pub params: [u8; 6536],
+    pub params: HashParams,
+}
+
+#[zero_copy]
+pub struct HashParams {
+    params: FixedPoseidonBN254Parameters,
 }
 
 #[account]
@@ -128,6 +138,16 @@ pub struct DepositInto<'info> {
     merkle_tree_account: Loader<'info, MerkleTreeAccount>,
     #[account(mut)]
     anchor_metadata: Account<'info, AnchorMetadata>,
+    pub system_program: AccountInfo<'info>,
+    pub token_program: AccountInfo<'info>,
+}
+
+#[derive(Accounts)]
+pub struct HashInitialize<'info> {
+    #[account(mut, signer)]
+    pub depositor: AccountInfo<'info>,
+    #[account(mut)]
+    merkle_tree_account: Loader<'info, MerkleTreeAccount>,
     pub system_program: AccountInfo<'info>,
     pub token_program: AccountInfo<'info>,
 }

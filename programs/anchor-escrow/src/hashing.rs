@@ -9,10 +9,8 @@ use arkworks_utils::utils::bn254_x5_3::{
     PARTIAL_ROUNDS,
     WIDTH,
     SBOX,
-    get_mds_poseidon_bn254_x5_3,
-    get_rounds_poseidon_bn254_x5_3,
     ROUND_CONSTS,
-    MDS_ENTRIES
+    MDS_ENTRIES, get_poseidon_bn254_x5_3
 };
 use ark_bn254::Fr as Bn254;
 use arkworks_utils::utils::{get_bytes_array_from_hex};
@@ -46,13 +44,7 @@ pub fn parse_matrix<F: PrimeField>(mds_entries: Vec<Vec<&str>>) -> Vec<Vec<F>> {
 
 impl<F: PrimeField> CircomPoseidonHasher<F> {
     pub fn hash(input: &[u8]) -> Result<Vec<u8>, Error> {
-        msg!("before rounds");
-        let rounds = parse_vec(ROUND_CONSTS.to_vec());
-        msg!("before mds");
-        let mds = parse_matrix(MDS_ENTRIES.iter().map(|x| x.to_vec()).collect::<Vec<_>>());
-        msg!("before params");
-        let params = PoseidonParameters::<F>::new(rounds, mds, FULL_ROUNDS, PARTIAL_ROUNDS, WIDTH, SBOX);
-        msg!("before output");
+        let params = get_poseidon_bn254_x5_3();
         let output: F = <CRH<F> as CRHTrait>::evaluate(&params, input)?;
         let value = output.into_repr().to_bytes_le();
         Ok(value)
