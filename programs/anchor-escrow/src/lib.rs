@@ -17,6 +17,8 @@ declare_id!("Dw96F8NjN84googpni4mtSnCuAud9XkaPUFM1RJX53cK");
 
 #[program]
 pub mod anchor_escrow {
+    use crate::hashing_params::{get_round_consts, get_mds_matrix};
+
     use super::*;
 
     const ESCROW_PDA_SEED: &[u8] = b"escrow";
@@ -55,7 +57,7 @@ pub mod anchor_escrow {
 
     pub fn deposit(ctx: Context<DepositInto>, commitment: [u8; 32]) -> ProgramResult {
         let mut merkle_tree_account = ctx.accounts.merkle_tree_account.load_mut()?;
-        if merkle_tree_account.params.params.round_keys.len() == 0 {
+        if !merkle_tree_account.params.initialized {
             msg!("Parameters are not initialized");
             return Err(ProgramError::InvalidArgument);
         }
@@ -75,14 +77,9 @@ pub mod anchor_escrow {
 
     pub fn setup_params(ctx: Context<HashInitialize>) -> ProgramResult {
         let mut merkle_tree_account = ctx.accounts.merkle_tree_account.load_mut()?;
-        merkle_tree_account.params.params = FixedPoseidonBN254Parameters::new(
-            hashing_params::get_round_consts(),
-            hashing_params::get_mds_matrix(),
-            FULL_ROUNDS,
-            PARTIAL_ROUNDS,
-            WIDTH,
-            SBOX,
-        );
+        merkle_tree_account.params.round_consts = get_round_consts();
+        merkle_tree_account.params.mds_matrix = get_mds_matrix();
+        merkle_tree_account.params.initialized = true;
         Ok(())
     }
 }
@@ -129,7 +126,9 @@ pub struct MerkleTreeAccount {
 
 #[zero_copy]
 pub struct HashParams {
-    params: FixedPoseidonBN254Parameters,
+    initialized: bool,
+    round_consts: [[u8; 32]; 195],
+    mds_matrix: [[[u8; 32]; 3]; 3]
 }
 
 #[account]

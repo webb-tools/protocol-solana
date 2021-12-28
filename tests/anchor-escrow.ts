@@ -147,6 +147,18 @@ describe('anchor-escrow', () => {
     );
     vault_authority_pda = _vault_authority_pda;
 
+    await program.rpc.setupParams(
+      {
+        accounts: {
+          depositor: depositorMainAccount.publicKey,
+          merkleTreeAccount: merkleTreeAccount.publicKey,
+          systemProgram: anchor.web3.SystemProgram.programId,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        },
+        signers: [depositorMainAccount],
+      }
+    );
+
     await program.rpc.deposit(
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       {
