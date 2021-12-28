@@ -2,6 +2,12 @@ use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Mint, SetAuthority, TokenAccount, Transfer};
 use spl_token::instruction::AuthorityType;
 use arkworks_utils::poseidon::{fixed_sized_bn254_x5_3_params::FixedPoseidonBN254Parameters};
+use arkworks_utils::utils::bn254_x5_3::{
+    FULL_ROUNDS,
+    PARTIAL_ROUNDS,
+    WIDTH,
+    SBOX,
+};
 
 mod hashing;
 mod merkle_tree;
@@ -62,9 +68,16 @@ pub mod anchor_escrow {
         Ok(())
     }
 
-    pub fn setup_params(ctx: Context<HashInitialize>, params: Vec<[u8; 32]>) -> ProgramResult {
+    pub fn setup_params(ctx: Context<HashInitialize>) -> ProgramResult {
         let mut merkle_tree_account = ctx.accounts.merkle_tree_account.load_mut()?;
-        let mut params: FixedPoseidonBN254Parameters = merkle_tree_account.params.params;
+        merkle_tree_account.params.params = FixedPoseidonBN254Parameters::new(
+            hashing_params::get_round_consts(),
+            hashing_params::get_mds_matrix(),
+            FULL_ROUNDS,
+            PARTIAL_ROUNDS,
+            WIDTH,
+            SBOX,
+        );
         Ok(())
     }
 }

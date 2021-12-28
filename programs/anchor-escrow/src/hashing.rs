@@ -1,16 +1,10 @@
-use anchor_lang::prelude::msg;
 use ark_crypto_primitives::{Error, CRH as CRHTrait};
 use ark_ff::{BigInteger, PrimeField};
-use ark_std::{marker::PhantomData, vec::Vec};
+use ark_std::{vec::Vec};
 use arkworks_gadgets::poseidon::CRH;
 use arkworks_utils::poseidon::PoseidonParameters;
 use arkworks_utils::poseidon::fixed_sized_bn254_x5_3_params::FixedPoseidonBN254Parameters;
-use arkworks_utils::utils::bn254_x5_3::{
-    FULL_ROUNDS,
-    PARTIAL_ROUNDS,
-    WIDTH,
-    SBOX,
-};
+
 pub struct CircomPoseidonHasher;
 
 impl CircomPoseidonHasher {
@@ -23,10 +17,10 @@ impl CircomPoseidonHasher {
         let params = PoseidonParameters::<ark_bn254::Fr>::new(
 			round_consts,
 			mds_matrix,
-			FULL_ROUNDS,
-			PARTIAL_ROUNDS,
-			WIDTH,
-			SBOX
+			fixed_params.full_rounds,
+			fixed_params.partial_rounds,
+			fixed_params.width,
+			fixed_params.sbox,
 		);
         let output: ark_bn254::Fr = <CRH<ark_bn254::Fr> as CRHTrait>::evaluate(&params, input)?;
         let value = output.into_repr().to_bytes_le();
