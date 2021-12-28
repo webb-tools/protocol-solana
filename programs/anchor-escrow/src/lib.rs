@@ -55,6 +55,11 @@ pub mod anchor_escrow {
 
     pub fn deposit(ctx: Context<DepositInto>, commitment: [u8; 32]) -> ProgramResult {
         let mut merkle_tree_account = ctx.accounts.merkle_tree_account.load_mut()?;
+        if merkle_tree_account.params.params.round_keys.len() == 0 {
+            msg!("Parameters are not initialized");
+            return Err(ProgramError::InvalidArgument);
+        }
+
         let _inserted_index = merkle_tree_account.insert(commitment);
         if let Ok(index) = _inserted_index {
             msg!("inserted_index: {}", index);
