@@ -1,3 +1,4 @@
+use super::*;
 use ark_crypto_primitives::{Error, CRH as CRHTrait};
 use ark_ff::{BigInteger, PrimeField};
 use ark_std::{vec::Vec};
@@ -10,14 +11,22 @@ use arkworks_utils::utils::bn254_x5_3::{
     SBOX,
 };
 
+use crate::hashing_params::*;
+
 pub struct CircomPoseidonHasher;
 
 impl CircomPoseidonHasher {
-    pub fn hash(input: &[u8], round_consts: [[u8; 32]; 195], mds_matrix: [[[u8; 32]; 3]; 3]) -> Result<Vec<u8>, Error> {
-		let round_consts = round_consts.iter().map(|x| ark_bn254::Fr::from_be_bytes_mod_order(x)).collect::<Vec<_>>();
-		let mds_matrix = mds_matrix
+    pub fn hash(input: &[u8]) -> Result<Vec<u8>, Error> {
+		msg!("Hashing...");
+		let mut ctr = 0;
+		let round_consts = BN254_X5_3_ROUND_CONSTS_BOOLS.iter().map(|x| {
+			msg!("{}", ctr);
+			ctr += 1;
+			ark_bn254::Fr::from_repr(BigInteger::from_bits_be(&x[..])).unwrap()
+		}).collect::<Vec<_>>();
+		let mds_matrix = BN254_X5_3_MDS_MATRIX_BOOLS
 			.iter()
-			.map(|x| x.iter().map(|y| ark_bn254::Fr::from_be_bytes_mod_order(y)).collect())
+			.map(|x| x.iter().map(|y| ark_bn254::Fr::from_repr(BigInteger::from_bits_be(&y[..])).unwrap()).collect())
 			.collect::<Vec<Vec<ark_bn254::Fr>>>();
         let params = PoseidonParameters::<ark_bn254::Fr>::new(
 			round_consts,

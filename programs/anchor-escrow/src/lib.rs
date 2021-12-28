@@ -1,13 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Mint, SetAuthority, TokenAccount, Transfer};
 use spl_token::instruction::AuthorityType;
-use arkworks_utils::poseidon::{fixed_sized_bn254_x5_3_params::FixedPoseidonBN254Parameters};
-use arkworks_utils::utils::bn254_x5_3::{
-    FULL_ROUNDS,
-    PARTIAL_ROUNDS,
-    WIDTH,
-    SBOX,
-};
 
 mod hashing;
 mod merkle_tree;
@@ -17,8 +10,6 @@ declare_id!("Dw96F8NjN84googpni4mtSnCuAud9XkaPUFM1RJX53cK");
 
 #[program]
 pub mod anchor_escrow {
-    use crate::hashing_params::{get_round_consts, get_mds_matrix};
-
     use super::*;
 
     const ESCROW_PDA_SEED: &[u8] = b"escrow";
@@ -57,11 +48,6 @@ pub mod anchor_escrow {
 
     pub fn deposit(ctx: Context<DepositInto>, commitment: [u8; 32]) -> ProgramResult {
         let mut merkle_tree_account = ctx.accounts.merkle_tree_account.load_mut()?;
-        if !merkle_tree_account.params.initialized {
-            msg!("Parameters are not initialized");
-            return Err(ProgramError::InvalidArgument);
-        }
-
         let _inserted_index = merkle_tree_account.insert(commitment);
         if let Ok(index) = _inserted_index {
             msg!("inserted_index: {}", index);
@@ -72,14 +58,6 @@ pub mod anchor_escrow {
             )?;
         }
 
-        Ok(())
-    }
-
-    pub fn setup_params(ctx: Context<HashInitialize>) -> ProgramResult {
-        let mut merkle_tree_account = ctx.accounts.merkle_tree_account.load_mut()?;
-        merkle_tree_account.params.round_consts = get_round_consts();
-        merkle_tree_account.params.mds_matrix = get_mds_matrix();
-        merkle_tree_account.params.initialized = true;
         Ok(())
     }
 }
@@ -167,7 +145,6 @@ pub struct HashInitialize<'info> {
     #[account(mut)]
     merkle_tree_account: Loader<'info, MerkleTreeAccount>,
     pub system_program: AccountInfo<'info>,
-    pub token_program: AccountInfo<'info>,
 }
 
 impl<'info> Initialize<'info> {

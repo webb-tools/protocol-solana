@@ -219,15 +219,15 @@ fn main() {
     ];
 
     let result = parse_vec::<ark_bn254::Fr>(ROUND_CONSTS.to_vec());
-    let round_consts_byte_results: Vec<Vec<u8>> = result.iter().map(|x| {
-        x.into_repr().to_bytes_be()
+    let round_consts_bit_results: Vec<Vec<bool>> = result.iter().map(|x| {
+        x.into_repr().to_bits_be()
     }).collect();
     let mds_result: Vec<Vec<ark_bn254::Fr>> = parse_matrix(MDS_ENTRIES.iter().map(|x| x.to_vec()).collect::<Vec<_>>());
-    let mds_matrix_byte_results: Vec<Vec<Vec<u8>>> = mds_result.iter().map(|x| {
+    let mds_matrix_bit_results: Vec<Vec<Vec<bool>>> = mds_result.iter().map(|x| {
         x.iter().map(|y| {
-            y.into_repr().to_bytes_be()
-        }).collect::<Vec<Vec<u8>>>()
-    }).collect::<Vec<Vec<Vec<u8>>>>();
-    println!("{:?}", mds_matrix_byte_results);
-    println!("{:?}", VALUES == result);
+            y.into_repr().to_bits_be()
+        }).collect::<Vec<Vec<bool>>>()
+    }).collect::<Vec<Vec<Vec<bool>>>>();
+    println!("{:?}", round_consts_bit_results);
+    println!("{:?}", mds_matrix_bit_results);
 }
