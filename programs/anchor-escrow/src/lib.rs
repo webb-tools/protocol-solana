@@ -1,10 +1,11 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Mint, SetAuthority, TokenAccount, Transfer};
 use spl_token::instruction::AuthorityType;
-use arkworks_utils::poseidon::fixed_sized_bn254_x5_3_params::FixedPoseidonBN254Parameters;
+use arkworks_utils::poseidon::{fixed_sized_bn254_x5_3_params::FixedPoseidonBN254Parameters};
 
 mod hashing;
 mod merkle_tree;
+mod hashing_params;
 
 declare_id!("Dw96F8NjN84googpni4mtSnCuAud9XkaPUFM1RJX53cK");
 

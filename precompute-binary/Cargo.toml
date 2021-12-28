@@ -1,0 +1,19 @@
+[package]
+name = "precompute-binary"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ark-ff = { version = "^0.3.0", default-features = false }
+ark-std = { version = "^0.3.0", default-features = false }
+
+ark-ec = { version = "^0.3.0", default-features = false }
+ark-serialize = {version = "^0.3.0", default-features = false }
+
+# curves
+ark-bn254 = { version = "^0.3.0", default-features = false, features = [ "curve" ] }
+
+# utils
+arkworks-utils = { version = "0.4.5", default-features = false, features = ["poseidon_bn254_x5_3"] }

@@ -47,7 +47,7 @@ impl MerkleTreeAccount {
         buf.extend_from_slice(&left);
         buf.extend_from_slice(&right);
         msg!("buf: {:?}", buf);
-        if let Ok(value) = BN254CircomPoseidon3x5Hasher::hash(&buf) {
+        if let Ok(value) = BN254CircomPoseidon3x5Hasher::hash(&buf, self.params.params) {
             buf32.copy_from_slice(&value);
         }
 
